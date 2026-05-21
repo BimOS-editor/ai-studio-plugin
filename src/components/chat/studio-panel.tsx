@@ -12,6 +12,12 @@ const VIEWS = [
   { key: 'structure', zh: '仅结构', en: 'structure only' },
 ]
 
+const QUALITY = [
+  { key: "flash", zh: "Flash", model: "google/gemini-2.5-flash-image" },
+  { key: "pro", zh: "Pro", model: "google/gemini-3.1-flash-image-preview" },
+  { key: "ultra", zh: "Ultra", model: "google/gemini-3-pro-image-preview" },
+];
+
 const INTERIOR = [
   { key: 'furnished', zh: '带家具', en: 'fully furnished interior' },
   { key: 'empty', zh: '仅房屋', en: 'empty room, no furniture' },
@@ -85,6 +91,7 @@ export function StudioPanel() {
   const [view, setView] = useState('isometric')
   const [style, setStyle] = useState("realistic")
   const [wallTreatment, setWallTreatment] = useState("white")
+  const [quality, setQuality] = useState("flash")
   const [interior, setInterior] = useState('furnished')
   const [lighting, setLighting] = useState('daylight')
   const [effectStyle, setEffectStyle] = useState('modern-natural')
@@ -143,7 +150,7 @@ export function StudioPanel() {
         body: JSON.stringify({
           images: refImages.map(r => r.src),
           prompt,
-          view, style, interior, lighting, effectStyle, wallTreatment,
+          view, style, interior, lighting, effectStyle, wallTreatment, quality,
         }),
       })
       const data = await res.json()
@@ -152,13 +159,13 @@ export function StudioPanel() {
     } catch (err) { alert(`生成失败: ${(err as Error).message}`) }
     finally { setIsGenerating(false) }
       clearInterval(timer)
-      setGenElapsed(0)  }, [refImages, buildPrompt, view, style, interior, lighting, effectStyle, wallTreatment])
+      setGenElapsed(0)  }, [refImages, buildPrompt, view, style, interior, lighting, effectStyle, wallTreatment, quality])
 
   const downloadImage = useCallback((src: string, i: number) => {
     const a = document.createElement('a'); a.href = src; a.download = `render-${Date.now()}-${i}.png`; a.click()
   }, [])
 
-  const hasSelection = view || style || interior || lighting || effectStyle || wallTreatment
+  const hasSelection = view || style || interior || lighting || effectStyle || wallTreatment || quality
 
   return (
     <div className="flex h-full flex-col">
@@ -206,6 +213,7 @@ export function StudioPanel() {
             <OptionGroup label="景观视角" onChange={setView} options={VIEWS} selected={view} />
             <OptionGroup label="风格" onChange={setStyle} options={STYLES} selected={style} />
             <OptionGroup label="内部" onChange={setInterior} options={INTERIOR} selected={interior} />
+            <OptionGroup label="出图品质" onChange={setQuality} options={QUALITY} selected={quality} />
             <OptionGroup label="内墙方案" onChange={setWallTreatment} options={WALL_TREATMENT} selected={wallTreatment} />
             <OptionGroup label="灯光与氛围" onChange={setLighting} options={LIGHTINGS} selected={lighting} />
             <OptionGroup label="效果风格" onChange={setEffectStyle} options={EFFECT_STYLES} selected={effectStyle} />
